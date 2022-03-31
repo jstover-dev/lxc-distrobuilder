@@ -1,0 +1,74 @@
+image: 
+  description: Debian Minimal
+  distribution: debian 
+  architecture: amd64
+  release: buster
+
+
+source: 
+  downloader: debootstrap
+  url: http://deb.debian.org/debian
+  keys:
+    - 126C0D24BD8A2942CC7DF8AC7638D0442B90D010
+    - A1BD8E9D78F7FE5C3E65D8AF8B48AD6246925553
+    - 6D33866EDD8FFA41C0143AEDDCC9EFBF77E11517
+    - 80D15823B7FD1561F9F7BCDDDC30D7C23CBBABEE
+  keyserver: keyserver.ubuntu.com 
+  variant: minbase
+
+
+packages: 
+  manager: apt
+  update: true
+  cleanup: true
+  sets:
+    - packages:
+        - dialog
+        - ifupdown
+        - init
+        - iproute2
+        - iputils-ping
+        - isc-dhcp-client
+        - locales
+        - netbase
+        - net-tools
+        - openssh-client
+        - procps
+        - vim
+        - linux-image-amd64
+        - shim-signed
+        - acpid
+        - grub-efi
+        - openssh-server
+      action: install
+
+  repositories:
+    - name: sources.list
+      url: |-
+        deb http://deb.debian.org/debian {{ image.release }} main
+        deb http://security.debian.org/debian-security {{ image.release }}/updates main
+
+actions:
+  - trigger: post-packages
+    action: |-
+      #!/bin/sh
+      set -eux
+      # Disable networkd (unused)
+      systemctl mask systemd-networkd.service
+      systemctl mask systemd-networkd.socket
+      systemctl mask systemd-networkd-wait-online.service
+      # Make sure the locale is built and functional
+      echo en_US.UTF-8 UTF-8 >> /etc/locale.gen
+      locale-gen en_US.UTF-8 UTF-8
+      update-locale LANG=en_US.UTF-8
+      # Cleanup underlying /run
+      mount -o bind / /mnt
+      rm -rf /mnt/run/*
+      umount /mnt
+      # Cleanup temporary shadow paths
+      rm /etc/*-
+
+
+mappings:
+  architecture_map: debian
+
