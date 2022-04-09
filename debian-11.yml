@@ -23,6 +23,7 @@ packages:
   cleanup: true
   sets:
     - packages:
+        - locales
         - openssh-server
 #       - dialog
 #       - ifupdown

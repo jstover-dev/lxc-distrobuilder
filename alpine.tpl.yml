@@ -1,7 +1,7 @@
 image: 
   description: Alpine Linux
   distribution: minimalalpine 
-  release: 3.13.1
+  release: {{ ALPINE_RELEASE }}
 
 
 source: 
