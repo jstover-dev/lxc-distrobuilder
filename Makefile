@@ -17,7 +17,7 @@ DEBIAN_IMAGES       := $(foreach v,$(DEBIAN_VERSIONS),$(IMAGES_DIR)/distrobuilde
 ALL_CONFIGS         := $(ALPINE_CONFIGS) $(DEBIAN_CONFIGS)
 ALL_IMAGES          := $(ALPINE_IMAGES) $(DEBIAN_IMAGES)
 
-EXISTING_IMAGES		:= $(wildcard $(ALL_IMAGES))
+EXISTING_IMAGES     := $(wildcard $(IMAGES_DIR)/*.tar.xz)
 
 UPLOAD_HOST         ?=
 UPLOAD_PATH         ?= template/cache
