@@ -75,7 +75,5 @@ $(IMAGES_DIR)/distrobuilder-%.tar.xz: $(TEMPLATES_DIR)/%.yml | _unlock_sudo
 		)" ;\
 	)
 
-#mv -fv $$BUILD_DIR/rootfs.tar.xz $@ ;\
-#rm -rf $$BUILD_DIR ;\
 _unlock_sudo:
 	@sudo whoami >/dev/null

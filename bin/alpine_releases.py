@@ -14,7 +14,8 @@ def get_releases(supported: bool = False):
     print('Fetching latest alpine releases ...', file=sys.stderr)
     df = pandas.read_html('https://alpinelinux.org/releases/')[0][1:]
     if supported:
-        df = df[df['End of support'].apply(date.fromisoformat) > date.today()]
+        support_date = df['End of support'].str.extract('(\d{4}-\d{2}-\d{2})', expand=False)
+        df = df[support_date.apply(date.fromisoformat) > date.today()]
 
     df['releases'] = df['Minor releases'].str.split('|')
     df['releases'] = df['releases'].apply(lambda row: [x.strip() for x in row if x.strip()])
@@ -28,3 +29,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     for release in get_releases(supported=args.supported):
         print(release)
+
