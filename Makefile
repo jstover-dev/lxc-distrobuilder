@@ -4,8 +4,9 @@ TEMPLATES_DIR       := templates
 IMAGES_DIR          := images
 BUILDS_DIR          := builds
 
-ALPINE_LATEST       := $(shell $(PWD)/bin/alpine_releases.py --supported)
-ALPINE_VERSIONS     ?= $(ALPINE_LATEST)
+ALPINE_CURRENT      := $(shell $(PWD)/bin/alpine_releases.py --supported || echo error)
+ALPINE_LATEST       := $(lastword $(sort $(ALPINE_CURRENT)))
+ALPINE_VERSIONS     ?= $(ALPINE_CURRENT) $(ALPINE_LATEST)-latest
 DEBIAN_VERSIONS     ?= 11
 
 ALPINE_CONFIGS      := $(foreach v,$(ALPINE_VERSIONS),$(TEMPLATES_DIR)/alpine-$(v).yml)
@@ -22,6 +23,9 @@ EXISTING_IMAGES     := $(wildcard $(IMAGES_DIR)/*.tar.xz)
 UPLOAD_HOST         ?=
 UPLOAD_PATH         ?= template/cache
 
+ifeq ($(ALPINE_LATEST),error)
+$(error Error while retrieving the latest Alpine releases)
+endif
 
 .PHONY: default images templates alpine debian upload clean _unlock_sudo
 
@@ -51,7 +55,16 @@ clean:
 
 templates/alpine-%.yml: alpine.yml.mo
 	@[ -d $(TEMPLATES_DIR) ] || mkdir -p $(TEMPLATES_DIR)
-	ALPINE_RELEASE=$* $(MO) "$<" > "$@"
+	( \
+		if echo "$*" | grep -q "\-latest"; then \
+			export ALPINE_RELEASE=$(ALPINE_LATEST); \
+			export TRACK_STABLE_VERSION=true; \
+		else \
+			export ALPINE_RELEASE=$*; \
+			export TRACK_STABLE_VERSION=false; \
+		fi; \
+		$(MO) "$<" > "$@" \
+	)
 
 
 templates/debian-%.yml: debian-%.yml

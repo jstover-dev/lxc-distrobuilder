@@ -47,3 +47,11 @@ actions:
     action: |-
       #!/bin/sh
       rc-update add sshd
+  - trigger: post-files
+    action: |-
+      #!/bin/sh
+      if {{ TRACK_STABLE_VERSION }}; then
+          sed -i 's/v[0-9]\+\.[0-9]\+[^\/]*\//latest-stable\//' /etc/apk/repositories
+      fi
+
+
